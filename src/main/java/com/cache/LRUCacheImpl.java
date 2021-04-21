@@ -5,18 +5,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * This is an implementation of the Least Recently Used cache
+ *
+ * @param <K> Key type
+ * @param <V> Value type
+ */
 public class LRUCacheImpl<K, V> implements Cache<K, V> {
-    private final Map<K, V> cache = new HashMap<>();
-    private final AbstractQueue<K> queue = new ConcurrentLinkedQueue<>();
-    private final int cacheSize;
 
-    public LRUCacheImpl(int cacheSize) {
-        this.cacheSize = cacheSize;
-    }
+    private final Map<K, V> cache;
+    private final AbstractQueue<K> queue;
+    private final int maxCacheSize;
 
-    @Override
-    public boolean containsKey(K key) {
-        return (cache.containsKey(key));
+    /**
+     * Public constructor for LRU cache
+     *
+     * @param maxCacheSize  determine max size of the cache
+     */
+    public LRUCacheImpl(int maxCacheSize) {
+        this.maxCacheSize = maxCacheSize;
+        cache = new HashMap<>(maxCacheSize);
+        queue = new ConcurrentLinkedQueue<>();
     }
 
     @Override
@@ -29,7 +38,7 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
     @Override
     public void set(K key, V value) {
         if (key == null || value == null) throw new NullPointerException();
-        if (cacheSize <= 0) {
+        if (maxCacheSize <= 0) {
             return;
         }
 
@@ -37,7 +46,7 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
             queue.remove(key);
         }
 
-        if (queue.size() >= cacheSize) {
+        if (queue.size() >= maxCacheSize) {
             K lruKey = queue.poll();
             if (lruKey != null) {
                 cache.remove(lruKey);
@@ -46,5 +55,10 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
 
         queue.add(key);
         cache.put(key, value);
+    }
+
+    @Override
+    public boolean containsKey(K key) {
+        return (cache.containsKey(key));
     }
 }
