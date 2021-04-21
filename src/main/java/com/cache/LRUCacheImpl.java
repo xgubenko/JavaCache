@@ -3,6 +3,7 @@ package com.cache;
 import java.util.AbstractQueue;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -30,6 +31,8 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
 
     @Override
     public V get(K key) {
+        Objects.requireNonNull(key);
+
         queue.remove(key);
         queue.add(key);
         return cache.get(key);
@@ -37,7 +40,9 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
 
     @Override
     public void set(K key, V value) {
-        if (key == null || value == null) throw new NullPointerException();
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(value);
+
         if (maxCacheSize <= 0) {
             return;
         }
